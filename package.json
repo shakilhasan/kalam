@@ -2,12 +2,14 @@
   "name": "simple-react-chat-app",
   "version": "0.1.0",
   "private": true,
+  "homepage": "http://shakilhasan.github.io/chat",
   "dependencies": {
     "@material-ui/core": "^4.11.3",
     "@material-ui/icons": "^4.11.2",
     "@testing-library/jest-dom": "^5.12.0",
     "@testing-library/react": "^11.2.6",
     "@testing-library/user-event": "^12.8.3",
+    "gh-pages": "^3.2.3",
     "install": "^0.13.0",
     "npm": "^7.11.1",
     "react": "^17.0.2",
@@ -22,7 +24,9 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
   },
   "eslintConfig": {
     "extends": [
