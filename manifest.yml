@@ -1,0 +1,5 @@
+applications:
+  - name: Simple Node Chat Server
+memory: 64M
+routes:
+  - route: simple-node-chat-server-<your-intials>.<server-closest-to-you>.cf.appdomain.cloud
