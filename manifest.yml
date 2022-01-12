@@ -1,0 +1,8 @@
+applications:
+  - name: Simple React Chat App
+memory: 64M
+path: build/
+buildpack: staticfile_buildpack 
+routes:
+#  - route: simple-react-chat-app-<your-intials>.<server-closest-to-you>.cf.appdomain.cloud
+  - route: "http://localhost::3080"
