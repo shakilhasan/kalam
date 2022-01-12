@@ -3,6 +3,8 @@ var app = express();
 var bodyParser = require("body-parser");
 var path = require("path")
 var uuid = require('uuid-random');
+const connectWithDb = require("./mongo");
+
 
 const { uniqueNamesGenerator, adjectives, colors, animals, names } = require('unique-names-generator');
 
@@ -13,6 +15,7 @@ var server = app.listen(PORT, function() {
   var host = server.address().address;
   var port = server.address().port;
   console.log('Listening at http://%s:%s', 'localhost:', port);
+  connectWithDb();
 });
 
 app.use(bodyParser.json());
