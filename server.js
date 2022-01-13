@@ -1,19 +1,23 @@
-var express = require("express"); 
-var app = express();
-var bodyParser = require("body-parser");
-var path = require("path")
-var uuid = require('uuid-random');
+const express = require("express");
+const app = express();
+const bodyParser = require("body-parser");
+const path = require("path");
+const uuid = require('uuid-random');
 const connectWithDb = require("./mongo");
+const controller = require('./src/controllers');
+const chatRoomController = controller.chatRoomController;
+const connectedClientController = controller.connectedClientController;
+
 
 
 const { uniqueNamesGenerator, adjectives, colors, animals, names } = require('unique-names-generator');
 
 // Running our server on port 3080
-var PORT  = process.env.PORT || 8080
+const PORT = process.env.PORT || 8080;
 
-var server = app.listen(PORT, function() {
-  var host = server.address().address;
-  var port = server.address().port;
+const server = app.listen(PORT, function () {
+  const host = server.address().address;
+  const port = server.address().port;
   console.log('Listening at http://%s:%s', 'localhost:', port);
   connectWithDb();
 });
@@ -27,62 +31,85 @@ app.use(function(req, res, next) {
 });
 
 //.........
-var io = require('socket.io')(server)
-var chatRoomData = []
-var connectedClients = {}
+const io = require('socket.io')(server);
+// let chatRoomData = [];
+const connectedClients = {};
 
 io.on('connection', (client) => {
 
   console.log("New client connected");
 
   //Client Sent a message
-  client.on("SendMessage", (messageData) => {
-    chatRoomData.push(messageData)
-    sendUpdatedChatRoomData(client)
+  client.on("SendMessage", async (messageData) => {
+    // chatRoomData.push(messageData)
+    await chatRoomController.store(messageData)
+    await sendUpdatedChatRoomData(client)
   })
 
   //Client entered The chat Room
-  client.on("UserEnteredRoom", (userData) => {
-    var enteredRoomMessage = {message: `${userData.username} has entered the chat`, username: "", userID: 0, timeStamp: null}
-    chatRoomData.push(enteredRoomMessage)
-    sendUpdatedChatRoomData(client)
+  client.on("UserEnteredRoom", async (userData) => {
+    console.log("userData..",userData)
+    const enteredRoomMessage = {
+      message: `${userData.username} has entered the chat`,
+      username: "",
+      userID: 0,
+      timeStamp: null
+    };
+    // chatRoomData.push(enteredRoomMessage)
+    await chatRoomController.store(enteredRoomMessage)
+    await sendUpdatedChatRoomData(client)
     connectedClients[client.id] = userData
-
+    // await connectedClientController.store(userData)
   })
 
   //Creating identity for new connected user
   client.on("CreateUserData", () => {
     let userID = uuid();
     let username = uniqueNamesGenerator({ dictionaries: [adjectives, names] });
-    var userData = {userID: userID, username: username}
+    const userData = {userID: userID, username: username};
     client.emit("SetUserData", userData)
   })
 
 
   //Player Disconnecting from chat room...
-  client.on('disconnecting', (data) => {
+  client.on('disconnecting', async (data) => {
     console.log("Client disconnecting...");
+    const existingClient = await connectedClientController.existByUserId(client.id)
 
     if(connectedClients[client.id]){
-      var leftRoomMessage = {message: `${connectedClients[client.id].username} has left the chat`, username: "", userID: 0, timeStamp: null}
-      chatRoomData.push(leftRoomMessage)
-      sendUpdatedChatRoomData(client)
+    // if(existingClient){
+      const leftRoomMessage = {
+        message: `${connectedClients[client.id].username} has left the chat`,
+        // message: `${existingClient.username} has left the chat`,
+        username: "",
+        userID: 0,
+        timeStamp: null
+      };
+      // chatRoomData.push(leftRoomMessage)
+      await chatRoomController.store(leftRoomMessage)
+      await sendUpdatedChatRoomData(client)
       delete connectedClients[client.id]
+      // await connectedClientController.destroyByUserId(client.id)
     }
 
   });
 
   //Clearing Chat room data from server
-  client.on('ClearChat', () => {
-    chatRoomData=[]
-    console.log(chatRoomData)
-    sendUpdatedChatRoomData(client)
+  client.on('ClearChat', async () => {
+    // chatRoomData=[]
+    await chatRoomController.destroyAll()
+    // console.log(chatRoomData)
+    await sendUpdatedChatRoomData(client)
   })
 
 })
 
 //Sending update chat room data to all connected clients
-function sendUpdatedChatRoomData(client){
-  client.emit("RetrieveChatRoomData", chatRoomData)
-  client.broadcast.emit("RetrieveChatRoomData", chatRoomData)
+async function  sendUpdatedChatRoomData(client){
+  const allChatRoomData= await chatRoomController.findAll()
+  client.emit("RetrieveChatRoomData", allChatRoomData)
+  client.broadcast.emit("RetrieveChatRoomData", allChatRoomData)
+  // client.emit("RetrieveChatRoomData", chatRoomData)
+  // client.broadcast.emit("RetrieveChatRoomData", chatRoomData)
+
 }
