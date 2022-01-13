@@ -1,6 +1,7 @@
 import './App.css';
 
 import ChatRoom from './pages/ChatRoom'
+import EnterRoom from './pages/EnterRoom'
 import ClearChat from './pages/ClearChat'
 
 import {
@@ -18,6 +19,10 @@ function App() {
         <Switch>
 
           <Route exact path="/">
+            <EnterRoom/>
+          </Route>
+
+          <Route exact path="/chatRoom">
             <ChatRoom/>
           </Route>
 
