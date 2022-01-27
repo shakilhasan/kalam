@@ -5,6 +5,7 @@ import IconButton from '@material-ui/core/IconButton';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import SendIcon from '@material-ui/icons/Send';
 import { Row, Container } from 'react-bootstrap';
+import { useParams, useHistory } from "react-router-dom";
 
 import CurrentUserText from '../components/CurrentUserText'
 import OtherUserText from '../components/OtherUserText'
@@ -92,26 +93,26 @@ class ChatRoom extends Component {
 		// localStorage.removeItem('userID')
 		// localStorage.removeItem('username')
 
-		let userIDVal = localStorage.getItem('userID')
-		let usernameVal = localStorage.getItem('username')
+		let userIDVal ="erwer" //localStorage.getItem('userID')
+		let usernameVal = "fgdfg" //localStorage.getItem('username')
 
 		//If user does not have a userid and username saved in local storage, create them for them
 		if(!userIDVal){
-
-			socket.on("SetUserData", userData => {
-				//When user creation on server is complete, retrieve and save data to local storage
-				localStorage.setItem('userID', userData.userID)
-				localStorage.setItem('username', userData.username)
-				console.log(userData)
-
-				this.setState({currentUsername: userData.username, currentUserID: userData.userID})
-
-				//Notify Socket server is not ready to chat
-				socket.emit("UserEnteredRoom", userData)
-			});
-
-			//Send Socket command to create user info for current user
-			socket.emit("CreateUserData")
+			// history.push('/');
+			// socket.on("SetUserData", userData => {
+			// 	//When user creation on server is complete, retrieve and save data to local storage
+			// 	localStorage.setItem('userID', userData.userID)
+			// 	localStorage.setItem('username', userData.username)
+			// 	console.log(userData)
+			//
+			// 	this.setState({currentUsername: userData.username, currentUserID: userData.userID})
+			//
+			// 	//Notify Socket server is not ready to chat
+			// 	socket.emit("UserEnteredRoom", userData)
+			// });
+			//
+			// //Send Socket command to create user info for current user
+			// socket.emit("CreateUserData")
 		}
 		else {
 			//If user already has userid and username, notify server to allow them to join chat
@@ -130,6 +131,11 @@ class ChatRoom extends Component {
 		socket.off("RetrieveChatRoomData")
 		socket.off("SetUserData")
 	}
+// 	useEffect(() => {
+// 	return () => {
+// 	console.log('componentWillUnmount');
+// };
+// }, []);
 	setMessage(message){
 		//Set Message being typed in input field
 		this.setState({message: message})

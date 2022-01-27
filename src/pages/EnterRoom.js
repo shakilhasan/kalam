@@ -1,6 +1,6 @@
-import React, {Component } from 'react';
-import Button from '@material-ui/core/Button';
-import { useParams, useHistory } from "react-router";
+import React, { useState , useEffect} from "react";
+// import Button from '@material-ui/core/Button';
+import { useParams, useHistory } from "react-router-dom";
 import {
 	Container,
 	Card,
@@ -13,76 +13,70 @@ import {
 	Input,
 } from "reactstrap";
 import {socket} from '../services/socket'
-const history = useHistory();
-
 
 const autoScrollOffset = 100 //offset value that allows screen to auto scroll when you are not exactly at bottom of chat window
 
-class ChatRoom extends Component {
+const EnterRoom =()=> {
+	const history = useHistory();
+	const [name, setName] = useState('');
+	const [isExist, setIsExist] = useState(false);
+	const [currentUsername, setCurrentUsername] = useState("User1");
+	const [currentUserID, setCurrentUserID] = useState(1);
+	const [message, setMessage] = useState('');
+	const [chatRoomData, setChatRoomData] = useState([]);
+	const [initialLoad, setInitialLoad] = useState(true);
 
-	constructor(props) {
-	    super(props);
-	    this.state = {
-			name:'',
-			isExist:false,
-	    	currentUsername: "User1",
-	    	currentUserID: 1,
-	    	message: '',
-	    	chatRoomData: [
-	    	],
-	    	initialLoad: true,
-	    };
-	    //Create Ref for managing "auto-scroll"
-	    this.messagesEndRef = React.createRef()
-	}
+	//Create Ref for managing "auto-scroll"
+	const [messagesEndRef, setMessagesEndRef] = useState(React.createRef());
 
-	componentDidMount(){
+	useEffect(() => {
 		// localStorage.removeItem('userID')
 		// localStorage.removeItem('username')
 
 		let userIDVal = localStorage.getItem('userID')
 		let usernameVal = localStorage.getItem('username')
-
+		console.log("userIDVal....",userIDVal)
 		//If user does not have a userid and username saved in local storage, create them for them
-		if(!userIDVal){
-			this.setState({isExist: false})
-
+		if (userIDVal) {
+			setIsExist(true)
+			// history.push('/chatRoom');
+		} else {
+			setIsExist(false)
 		}
-		else {
-			this.setState({isExist: true})
-			history.push('/chatRoom');
-		}
+	}, [])
+
+
+	const handleSubmit = (e) => {
+		const userData = {userID: name, username: name};
+		localStorage.setItem('userID', userData.userID)
+		localStorage.setItem('username', userData.username)
+		//Notify Socket server is not ready to chat
+		socket.emit("UserEnteredRoom", userData)
+		history.push('/chatRoom');
 	}
-
-	handleSubmit(){
-
-
-	}
-	handleChange = event => {
+	const handleChange = event => {
+		console.log("handleChange")
+		console.log("handleChange...",event.target.value)
 		event.preventDefault();
-		this.setState({name: event.target.value})
+		setName(event.target.value)
 	}
-	render(){
 
-		let {chatRoomData, currentUsername} = this.state
+	return (
+		<Container>
+			<div>Enter Chat Room</div>
+			<Input
+				name="name"
+				type="text"
+				className="form-control"
+				onChange={handleChange}
+				value={name}
+			/>
+			<Button variant="contained" color="primary" onClick={(e) => handleSubmit(e)}>
+				Enter Chat Room
+			</Button>
 
-		return (
-			<Container>
-				<div>Enter Chat Room</div>
-				<Input
-					name="name"
-					type="text"
-					className="form-control"
-					onChange={this.handleChange}
-					value={this.state.name}
-				/>
-				<Button variant="contained" color="primary" onClick={ () => this.handleSubmit()}>
-			 		 Enter Chat Room
-				</Button>
+		</Container>
+	);
 
-			</Container>
-		);
-	}
 }
-
-export default ChatRoom;
+export default EnterRoom;
