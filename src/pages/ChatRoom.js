@@ -1,4 +1,4 @@
-import React, {Component, useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import IconButton from '@material-ui/core/IconButton';
@@ -13,6 +13,7 @@ import ChatNotification from '../components/ChatNotification'
 
 //Add socket import here
 import {socket} from '../services/socket'
+import {Input} from "reactstrap";
 let styles = {
 	chatRoomContainer: {
 		marginTop: 10,
@@ -74,8 +75,10 @@ const autoScrollOffset = 100 //offset value that allows screen to auto scroll wh
 
 const ChatRoom =()=> {
 
+	const [name, setName] = useState('');
+	const [isUserExist, setIsUserExist] = useState(false);
 	const [currentUsername, setCurrentUsername] = useState("User1");
-	const [currentUserID, setCurrentUserID] = useState(1);
+	const [currentUserID, setCurrentUserID] = useState('uid1');
 	const [message, setMessage] = useState('');
 	const [chatRoomData, setChatRoomData] = useState([]);
 	const [initialLoad, setInitialLoad] = useState(true);
@@ -86,34 +89,37 @@ const ChatRoom =()=> {
 	useEffect(() => {
 // localStorage.removeItem('userID')
 		// localStorage.removeItem('username')
-
-		let userIDVal ="erwer" //localStorage.getItem('userID')
-		let usernameVal = "fgdfg" //localStorage.getItem('username')
-
-		//If user does not have a userid and username saved in local storage, create them for them
-		if(!userIDVal){
-			// history.push('/');
-			// socket.on("SetUserData", userData => {
-			// 	//When user creation on server is complete, retrieve and save data to local storage
-			// 	localStorage.setItem('userID', userData.userID)
-			// 	localStorage.setItem('username', userData.username)
-			// 	console.log(userData)
-			//
-			// 	this.setState({currentUsername: userData.username, currentUserID: userData.userID})
-			//
-			// 	//Notify Socket server is not ready to chat
-			// 	socket.emit("UserEnteredRoom", userData)
-			// });
-			//
-			// //Send Socket command to create user info for current user
-			// socket.emit("CreateUserData")
-		}
-		else {
-			//If user already has userid and username, notify server to allow them to join chat
-			setCurrentUsername(usernameVal)
-			setCurrentUserID(userIDVal)
-			socket.emit("UserEnteredRoom", {userID: userIDVal, username: usernameVal})
-		}
+		setMessagesEndRef(React.createRef())
+		console.log('messagesEndRef..',messagesEndRef)
+		// let userIDVal = localStorage.getItem('userID')
+		// let usernameVal =  localStorage.getItem('username')
+		//
+		// //If user does not have a userid and username saved in local storage, create them for them
+		// if(!userIDVal){
+		// 	setIsUserExist(false)
+		// 	history.push('/');
+		// 	socket.on("SetUserData", userData => {
+		// 		//When user creation on server is complete, retrieve and save data to local storage
+		// 		localStorage.setItem('userID', userData.userID)
+		// 		localStorage.setItem('username', userData.username)
+		// 		console.log(userData)
+		//
+		// 		this.setState({currentUsername: userData.username, currentUserID: userData.userID})
+		//
+		// 		//Notify Socket server is not ready to chat
+		// 		socket.emit("UserEnteredRoom", userData)
+		// 	});
+		//
+		// 	//Send Socket command to create user info for current user
+		// 	socket.emit("CreateUserData")
+		// }
+		// else {
+		// 	setIsUserExist(true)
+		// 	// If user already has userid and username, notify server to allow them to join chat
+		// 	setCurrentUsername(usernameVal)
+		// 	setCurrentUserID(userIDVal)
+		// 	socket.emit("UserEnteredRoom", {userID: userIDVal, username: usernameVal})
+		// }
 
 		//Retrieve game data (from Get Chat data socket call)
 		socket.on("RetrieveChatRoomData", (chatRoomData) => {
@@ -132,7 +138,23 @@ const ChatRoom =()=> {
 		};
 	}, []);
 
+	const handleNameSubmit = (e) => {
+		const userData = {userID: name, username: name};
+		setCurrentUsername(userData.username)
+		setCurrentUserID(userData.userID )
+		localStorage.setItem('userID', userData.userID)
+		localStorage.setItem('username', userData.username)
+		//Notify Socket server is not ready to chat
+		socket.emit("UserEnteredRoom", userData)
 
+		setIsUserExist(true)
+	}
+	const handleNameChange = event => {
+		console.log("handleChange")
+		console.log("handleChange...",event.target.value)
+		event.preventDefault();
+		setName(event.target.value)
+	}
 	const setMessageData=(message)=>{
 		//Set Message being typed in input field
 		setMessage(message)
@@ -150,7 +172,7 @@ const ChatRoom =()=> {
 
 	const shouldScrollToBottom=()=>{
 		//If user is near the bottom of the chat, automatically navigate them to bottom when new chat message/notification appears
-		if (messagesEndRef.current.scrollHeight - messagesEndRef.current.scrollTop < messagesEndRef.current.offsetHeight + autoScrollOffset){
+		if (messagesEndRef?.current?.scrollHeight - messagesEndRef?.current?.scrollTop < messagesEndRef?.current?.offsetHeight + autoScrollOffset){
 			scrollToBottom()
 		}
 
@@ -163,11 +185,30 @@ const ChatRoom =()=> {
 
 	const scrollToBottom=()=>{
 		//Scrolls user to end of chat message window
-		messagesEndRef.current.scrollTop = messagesEndRef.current.scrollHeight
+		// messagesEndRef.current.scrollTop = messagesEndRef.current.scrollHeight ?? 11
 	}
 
 
 	return (
+
+		<>
+		{!isUserExist &&
+		<Container>
+			<div>Enter Chat Room</div>
+			<Input
+				name="name"
+				type="text"
+				className="form-control"
+				onChange={handleNameChange}
+				value={name}
+			/>
+			<Button variant="contained" color="primary" onClick={(e) => handleNameSubmit(e)}>
+				Enter Chat Room
+			</Button>
+
+		</Container>}
+
+		{isUserExist &&
 		<Container style = {styles.chatRoomContainer}>
 
 			<Container style ={styles.header}>
@@ -178,14 +219,12 @@ const ChatRoom =()=> {
 					in chat
 				</Row>
 			</Container>
-
-
 			<Container style={styles.chatThread} ref={messagesEndRef}>
 				{chatRoomData.map( (messageData, index) => {
 
-					if(messageData.username == currentUsername) {
+					if(messageData.username === currentUsername) {
 						return <CurrentUserText key={index} username={messageData.username} message={messageData.message}/>
-					} else if (messageData.username == '') {
+					} else if (messageData.username === '') {
 						return <ChatNotification key={index} username={messageData.username} message={messageData.message}/>
 					} else {
 						return <OtherUserText key={index} username={messageData.username} message={messageData.message}/>
@@ -195,7 +234,6 @@ const ChatRoom =()=> {
 
 
 			</Container>
-
 			<Container style={styles.messageInputSection}>
 					<TextField
 						style= {styles.messageTextField}
@@ -221,8 +259,8 @@ const ChatRoom =()=> {
 						}}
 					/>
 			</Container>
-
-		</Container>
+		</Container>}
+		</>
 	);
 }
 
