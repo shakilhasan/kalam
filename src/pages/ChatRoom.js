@@ -13,7 +13,14 @@ import ChatNotification from '../components/ChatNotification'
 
 //Add socket import here
 import {socket} from '../services/socket'
-import {Input} from "reactstrap";
+import {
+	Input,
+	Label,
+	CardBody,
+	Col,
+	Card
+} from "reactstrap";
+
 let styles = {
 	chatRoomContainer: {
 		marginTop: 10,
@@ -193,20 +200,49 @@ const ChatRoom =()=> {
 
 		<>
 		{!isUserExist &&
-		<Container>
-			<div>Enter Chat Room</div>
-			<Input
-				name="name"
-				type="text"
-				className="form-control"
-				onChange={handleNameChange}
-				value={name}
-			/>
-			<Button variant="contained" color="primary" onClick={(e) => handleNameSubmit(e)}>
-				Enter Chat Room
-			</Button>
 
-		</Container>}
+			<React.Fragment>
+				<div className="page-content">
+					<Container fluid={true}>
+						<Row>
+							<Col lg={12}>
+								<Card>
+									<CardBody>
+										<Row>
+											<Col md={12}>
+												<Row className="mb-2">
+													<Label htmlFor="delivery_address"
+														   className="col-md-3 col-form-label">
+														<span >Enter Chat Room</span>
+													</Label>
+													<div className="col-md-8">
+														<Input
+															name="name"
+															type="text"
+															className="form-control"
+															onChange={handleNameChange}
+															value={name}
+															placeholder="Enter a username"
+														/>
+													</div>
+												</Row>
+
+											</Col>
+										</Row>
+
+										<hr className="mb-5" />
+										<div className="d-flex flex-wrap gap-2">
+											<Button variant="contained" color="primary" onClick={(e) => handleNameSubmit(e)}>
+												Enter
+											</Button>
+										</div>
+									</CardBody>
+								</Card>
+							</Col>
+						</Row>
+					</Container>
+				</div>
+			</React.Fragment>}
 
 		{isUserExist &&
 		<Container style = {styles.chatRoomContainer}>
