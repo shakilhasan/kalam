@@ -20,7 +20,7 @@ let styles = {
 	},
 	header:{
 		height: "7vh",
-		backgroundColor: 'rgba(0, 0, 0, 0.25)',
+		backgroundColor: 'rgba(16,207,241,0.25)',
 		alignItems: 'center',
 		justifyContent: 'center',
 		display: 'flex',
@@ -43,7 +43,7 @@ let styles = {
 		marginRight: 3,
 	},
 	chatThread: {
-		backgroundColor: 'rgba(227, 227, 227, 0.2)',
+		backgroundColor: 'rgba(123,201,218,0.25)',
 		flex: 0,
 		display: 'flex',
     	flexDirection: 'column',
@@ -214,9 +214,7 @@ const ChatRoom =()=> {
 			<Container style ={styles.header}>
 				<Row style={styles.headerText}>Chat Room</Row>
 				<Row style={styles.youAppearAsText}>
-					You appear as
 					<div style={styles.usernameText}> {currentUsername}</div>
-					in chat
 				</Row>
 			</Container>
 			<Container style={styles.chatThread} ref={messagesEndRef}>

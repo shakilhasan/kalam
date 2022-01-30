@@ -9,13 +9,13 @@ let styles = {
   	display: 'flex',
   },
   textBubble: {
-  	padding: 10,
+  	padding: 0,
   	justifyContent: 'center',
   	flex: 0,
   	display: 'flex',
-  	borderRadius: 8,
-  	fontSize: 14,
-  	color: 'rgba(0, 0, 0, 0.50)'
+  	borderRadius: 4,
+  	fontSize: 12,
+  	color: 'rgba(107,142,148,0.25)'
   },
   usernameText:{
   	fontSize: 9
