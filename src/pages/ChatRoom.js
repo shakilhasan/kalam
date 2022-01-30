@@ -1,4 +1,4 @@
-import React, {Component } from 'react';
+import React, {Component, useEffect, useState} from 'react';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import IconButton from '@material-ui/core/IconButton';
@@ -72,25 +72,19 @@ let styles = {
 
 const autoScrollOffset = 100 //offset value that allows screen to auto scroll when you are not exactly at bottom of chat window
 
-class ChatRoom extends Component {
+const ChatRoom =()=> {
 
-	constructor(props) {
-	    super(props);
-	    this.state = {
-	    	currentUsername: "User1",
-	    	currentUserID: 1,
-	    	message: '',
-	    	chatRoomData: [
-	    	],
-	    	initialLoad: true,
-	    };
-	    //Create Ref for managing "auto-scroll"
-	    this.messagesEndRef = React.createRef()
-	}
+	const [currentUsername, setCurrentUsername] = useState("User1");
+	const [currentUserID, setCurrentUserID] = useState(1);
+	const [message, setMessage] = useState('');
+	const [chatRoomData, setChatRoomData] = useState([]);
+	const [initialLoad, setInitialLoad] = useState(true);
 
-	componentDidMount(){
+	//Create Ref for managing "auto-scroll"
+	const [messagesEndRef, setMessagesEndRef] = useState(React.createRef());
 
-		// localStorage.removeItem('userID')
+	useEffect(() => {
+// localStorage.removeItem('userID')
 		// localStorage.removeItem('username')
 
 		let userIDVal ="erwer" //localStorage.getItem('userID')
@@ -116,124 +110,120 @@ class ChatRoom extends Component {
 		}
 		else {
 			//If user already has userid and username, notify server to allow them to join chat
-			this.setState({currentUsername: usernameVal, currentUserID: userIDVal})
+			setCurrentUsername(usernameVal)
+			setCurrentUserID(userIDVal)
 			socket.emit("UserEnteredRoom", {userID: userIDVal, username: usernameVal})
 		}
 
 		//Retrieve game data (from Get Chat data socket call)
 		socket.on("RetrieveChatRoomData", (chatRoomData) => {
-			this.setState({chatRoomData: chatRoomData}, () => this.shouldScrollToBottom())
+			// this.setState({chatRoomData: chatRoomData}, () => shouldScrollToBottom())
+			setChatRoomData(chatRoomData)
+			shouldScrollToBottom()
 		})
+	}, [])
 
-	}
 
-	componentWillUnmount(){
-		socket.off("RetrieveChatRoomData")
-		socket.off("SetUserData")
-	}
-// 	useEffect(() => {
-// 	return () => {
-// 	console.log('componentWillUnmount');
-// };
-// }, []);
-	setMessage(message){
+	useEffect(() => {
+		return () => {
+			console.log('componentWillUnmount');
+			socket.off("RetrieveChatRoomData")
+			socket.off("SetUserData")
+		};
+	}, []);
+
+
+	const setMessageData=(message)=>{
 		//Set Message being typed in input field
-		this.setState({message: message})
+		setMessage(message)
 	}
 
-	sendMessageData(){
-		var {message, currentUsername, currentUserID} = this.state
-
+	const sendMessageData=()=>{
 		if(message.length > 0){
 			//Send chat message to server...
 			socket.emit("SendMessage", {message: message, username: currentUsername, userID: currentUserID, timeStamp: null})
 			//Clear chat message textfield box
-			this.setState({message: ''})
+			setMessage('')
 		}
 	}
 
 
-	shouldScrollToBottom(){
+	const shouldScrollToBottom=()=>{
 		//If user is near the bottom of the chat, automatically navigate them to bottom when new chat message/notification appears
-		if (this.messagesEndRef.current.scrollHeight - this.messagesEndRef.current.scrollTop < this.messagesEndRef.current.offsetHeight + autoScrollOffset){
-			this.scrollToBottom()
+		if (messagesEndRef.current.scrollHeight - messagesEndRef.current.scrollTop < messagesEndRef.current.offsetHeight + autoScrollOffset){
+			scrollToBottom()
 		}
 
 		//Navigate to end of chat when entering chat the first time
-		if(this.state.initialLoad){
-			this.scrollToBottom()
-			this.setState({initialLoad: false})
+		if(initialLoad){
+			scrollToBottom()
+			setInitialLoad( false)
 		}
 	}
 
-	scrollToBottom(){
+	const scrollToBottom=()=>{
 		//Scrolls user to end of chat message window
-		this.messagesEndRef.current.scrollTop = this.messagesEndRef.current.scrollHeight
+		messagesEndRef.current.scrollTop = messagesEndRef.current.scrollHeight
 	}
 
 
-	render(){
+	return (
+		<Container style = {styles.chatRoomContainer}>
 
-		let {chatRoomData, currentUsername} = this.state
+			<Container style ={styles.header}>
+				<Row style={styles.headerText}>Chat Room</Row>
+				<Row style={styles.youAppearAsText}>
+					You appear as
+					<div style={styles.usernameText}> {currentUsername}</div>
+					in chat
+				</Row>
+			</Container>
 
-		return (
-			<Container style = {styles.chatRoomContainer}>
 
-				<Container style ={styles.header}>
-					<Row style={styles.headerText}>Chat Room</Row>
-					<Row style={styles.youAppearAsText}>
-						You appear as 
-						<div style={styles.usernameText}> {currentUsername}</div>
-						in chat
-					</Row>
-				</Container>
-				
+			<Container style={styles.chatThread} ref={messagesEndRef}>
+				{chatRoomData.map( (messageData, index) => {
 
-				<Container style={styles.chatThread} ref={this.messagesEndRef}>
-					{chatRoomData.map( (messageData, index) => {
+					if(messageData.username == currentUsername) {
+						return <CurrentUserText key={index} username={messageData.username} message={messageData.message}/>
+					} else if (messageData.username == '') {
+						return <ChatNotification key={index} username={messageData.username} message={messageData.message}/>
+					} else {
+						return <OtherUserText key={index} username={messageData.username} message={messageData.message}/>
+					}
 
-						if(messageData.username == currentUsername) {
-			    			return <CurrentUserText key={index} username={messageData.username} message={messageData.message}/>
-			    		} else if (messageData.username == '') {
-			    			return <ChatNotification key={index} username={messageData.username} message={messageData.message}/>
-			    		} else {
-			    			return <OtherUserText key={index} username={messageData.username} message={messageData.message}/>
-			    		}
-		    			
-		    		})}
+				})}
 
-	  				
-	    		</Container>
-
-	    		<Container style={styles.messageInputSection}>
-			    		<TextField 
-			    			style= {styles.messageTextField}
-			    			id="input-with-icon-adornment" 
-			    			label="Enter Message" 
-			    			variant="outlined"  
-			    			value={this.state.message} 
-			    			onChange={(event) => this.setMessage(event.target.value)}
-			    			onKeyPress= {(event) => {
-					            if (event.key === 'Enter') {
-					              console.log('Enter key pressed');
-					              this.sendMessageData()
-					            }
-						    }}
-						    InputProps={{
-						    	endAdornment:(
-							    	<InputAdornment position="end">
-							    		<IconButton onClick={() => this.sendMessageData()}>
-							    			<SendIcon/>
-							    		</IconButton>
-							    	</InputAdornment>
-							    )
-						    }}
-			    		/>
-				</Container>
 
 			</Container>
-		);
-	}
+
+			<Container style={styles.messageInputSection}>
+					<TextField
+						style= {styles.messageTextField}
+						id="input-with-icon-adornment"
+						label="Enter Message"
+						variant="outlined"
+						value={message}
+						onChange={(event) => setMessageData(event.target.value)}
+						onKeyPress= {(event) => {
+							if (event.key === 'Enter') {
+							  console.log('Enter key pressed');
+							  sendMessageData()
+							}
+						}}
+						InputProps={{
+							endAdornment:(
+								<InputAdornment position="end">
+									<IconButton onClick={() => sendMessageData()}>
+										<SendIcon/>
+									</IconButton>
+								</InputAdornment>
+							)
+						}}
+					/>
+			</Container>
+
+		</Container>
+	);
 }
 
 export default ChatRoom;
