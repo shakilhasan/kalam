@@ -3,4 +3,4 @@ This repository is built on top of React.js, however in the implementation detai
 
 ## 🔥 Important Links 🔥
 - ✅ Back-End:  [Source Code](https://github.com/shakilhasan/chat-api)
-- ✅ Project Live : [Sabil-App](https://top-chat.herokuapp.com)
+- ✅ Project Live : [Chat-Room App](https://top-chat.herokuapp.com)
