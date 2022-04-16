@@ -1,5 +1,5 @@
 # Welcome to the Chat-Room App
-This repository is built on top of React.js, however in the implementation detail, we will find other supporting technologies as well.
+This is Real-time Chat-Room using ReactJS, NodeJS, Socket.io, MongoDB atlas. It include two apps, server-side and client-side apps.
 
 ## 🔥 Important Links 🔥
 - ✅ Back-End:  [Source Code](https://github.com/shakilhasan/chat-api)
