@@ -1,0 +1,23 @@
+{
+  "name": "simple-node-chat-server",
+  "version": "1.0.0",
+  "description": "Simple Node Server for Chat room app powered by Socket.io",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Bradston Henry",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1",
+    "mongoose": "^6.1.6",
+    "path": "^0.12.7",
+    "socket.io": "^4.4.1",
+    "unique-names-generator": "^4.4.0",
+    "uuid-random": "^1.3.2"
+  },
+  "engines": {
+    "node": "14.x"
+  }
+}
