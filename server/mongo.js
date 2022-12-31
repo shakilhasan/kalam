@@ -6,7 +6,7 @@ const DB_PORT = process.env.DB_PORT || "27017";
 const PASS = process.env.PASS || '0123456789';
 
 // const uri = `mongodb://${DB_HOST}:${DB_PORT}/${DB_NAME}`;
-const uri = 'mongodb+srv://shakilhasan:0123456789@cluster0.9r8bg.mongodb.net/myFirstDatabase?retryWrites=true&w=majority'
+const uri = 'mongodb+srv://shakilhasan:sH1404087@cluster0.9r8bg.mongodb.net/myFirstDatabase?retryWrites=true&w=majority'
 const options = {
     useUnifiedTopology: true,
     useNewUrlParser: true
